@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="{{ current_lang }}" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ _('credit-my-cc-title') }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <noscript>
+        <div class="noscript-warning">
+            {{ _('credit-my-cc-noscript') }}
+        </div>
+    </noscript>
+
+    {# ── Language selector ── #}
+    <nav class="lang-nav">
+        <label for="lang-select">{{ _('credit-my-cc-language-selector') }}</label>
+        <select id="lang-select">
+            {% for code, name in lang_choices %}
+            <option value="{{ code }}" {% if code == current_lang %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+    </nav>
+
+    {# ── Examples panel ── #}
+    <details class="examples-panel">
+        <summary>{{ _('credit-my-cc-examples') }}</summary>
+        <ul>
+            {% for ex in examples %}
+            <li>
+                <strong>{{ _( ex.label_key ) }}:</strong>
+                <a href="?filename={{ ex.filename | urlencode }}&amp;lang={{ current_lang }}">
+                    <code>{{ ex.filename }}</code>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </details>
+
+    {# ── Header ── #}
+    <header class="site-header">
+        <div class="logo-wrap">
+            <img src="{{ url_for('static', filename='images/credit-my-cc.svg') }}"
+                 alt="Credit-my-CC logo" class="logo" />
+        </div>
+        <div class="header-text">
+            <h1>{{ _('credit-my-cc-title') }}</h1>
+            <p>
+                {{ _('credit-my-cc-description') }}<br />
+                {{ _('credit-my-cc-description2') }}<br />
+                {{ _('credit-my-cc-description3') }}
+            </p>
+        </div>
+    </header>
+
+    {# ── Filename input ── #}
+    <section class="lookup-section">
+        <div class="input-row">
+            <label for="filename">{{ _('credit-my-cc-filename-label') }}</label>
+            <input type="text" id="filename"
+                   title="{{ _('credit-my-cc-filename-title') }}"
+                   placeholder="{{ filename_placeholder }}" />
+            <button id="btn-check" class="btn btn-primary">{{ _('credit-my-cc-button-check') }}</button>
+        </div>
+    </section>
+
+    {# ── Thumbnail ── #}
+    <div id="thumb-wrap" class="thumb-wrap hidden">
+        <a id="thumb-link" href="#" target="_blank" rel="noopener">
+            <img id="thumb-img" alt="{{ _('credit-my-cc-image-alt') }}" />
+        </a>
+    </div>
+
+    {# ── Status / error messages ── #}
+    <p id="status" class="status-message"></p>
+
+    {# ── Post-lookup form ── #}
+    <section id="post-lookup" class="post-lookup hidden">
+        <div class="form-grid">
+            <label>{{ _('credit-my-cc-title-label') }}</label>
+            <span id="pagename"><a id="pagename-link" href="#" target="_blank" rel="noopener"></a></span>
+
+            <label>{{ _('credit-my-cc-license-label') }}</label>
+            <span id="license"><a id="license-link" href="#" target="_blank" rel="noopener"></a></span>
+
+            <label for="usage">{{ _('credit-my-cc-usage-label') }}</label>
+            <input type="text" id="usage"
+                   title="{{ _('credit-my-cc-usage-title') }}"
+                   placeholder="{{ _('credit-my-cc-usage-placeholder') }}" required />
+
+            <label for="credit">{{ _('credit-my-cc-credit-label') }}</label>
+            <div class="input-with-preview">
+                <input type="text" id="credit"
+                       title="{{ _('credit-my-cc-credit-title') }}"
+                       placeholder="{{ _('credit-my-cc-credit-placeholder') }}" required />
+                <span id="credit-preview" class="preview"></span>
+            </div>
+
+            <label></label>
+            <span id="credit-extra" class="extra-info"></span>
+
+            <label for="upload_date">{{ _('credit-my-cc-upload-date-label') }}</label>
+            <input type="text" id="upload_date"
+                   title="{{ _('credit-my-cc-upload-date-title') }}"
+                   placeholder="{{ _('credit-my-cc-upload-date-placeholder') }}" />
+
+            <label></label>
+            <span id="upload-date-note" class="extra-info"></span>
+
+            <label for="descr">{{ _('credit-my-cc-description-label') }}</label>
+            <div class="input-with-preview">
+                <input type="text" id="descr"
+                       title="{{ _('credit-my-cc-description-title') }}"
+                       placeholder="{{ _('credit-my-cc-description-placeholder') }}" />
+                <span id="descr-preview" class="preview"></span>
+            </div>
+
+            <label></label>
+            <span id="descr-extra" class="extra-info"></span>
+
+            {# Hidden fields #}
+            <input type="hidden" id="license_title" />
+            <input type="hidden" id="license_url" />
+            <input type="hidden" id="file_title" />
+            <input type="hidden" id="file_url" />
+
+            <label>{{ _('credit-my-cc-letter-type-label') }}</label>
+            <div class="letter-selector" title="{{ _('credit-my-cc-letter-type-title') }}">
+                <label class="tone-option">
+                    <img src="{{ url_for('static', filename='images/Face-smile.png') }}"
+                         width="40" alt="{{ _('credit-my-cc-letter-happy') }}"
+                         title="{{ _('credit-my-cc-letter-happy') }}" />
+                    <input type="radio" name="tone" value="happy" checked />
+                </label>
+                <label class="tone-option">
+                    <img src="{{ url_for('static', filename='images/Face-plain.png') }}"
+                         width="40" alt="{{ _('credit-my-cc-letter-neutral') }}"
+                         title="{{ _('credit-my-cc-letter-neutral') }}" />
+                    <input type="radio" name="tone" value="neutral" />
+                </label>
+                <label class="tone-option">
+                    <img src="{{ url_for('static', filename='images/Face-sad.png') }}"
+                         width="40" alt="{{ _('credit-my-cc-letter-angry') }}"
+                         title="{{ _('credit-my-cc-letter-angry') }}" />
+                    <input type="radio" name="tone" value="angry" />
+                </label>
+            </div>
+
+            <label></label>
+            <button id="btn-write" class="btn btn-primary">{{ _('credit-my-cc-button-write') }}</button>
+        </div>
+    </section>
+
+    {# ── Generated letter ── #}
+    <section id="letter-section" class="letter-section hidden">
+        <div class="copy-hint">
+            {{ _('credit-my-cc-copy-instructions') }}<br />
+            {{ _('credit-my-cc-copy-instructions2') }}
+        </div>
+        <div id="letter-content" class="letter-content"></div>
+    </section>
+
+    {# ── Footer ── #}
+    <footer class="site-footer">
+        <hr />
+        <p>
+            {{ _('credit-my-cc-footer-produced-for',
+                  '<a href="https://wikimedia.se/">Wikimedia Sverige</a>',
+                  '<a href="https://commons.wikimedia.org/wiki/User:Lokal_Profil">Lokal_Profil</a>',
+                  'André Costa') }}
+        </p>
+        <p>
+            {{ _('credit-my-cc-footer-source',
+                  '<a href="https://github.com/lokal-profil/credit-my-cc_2">GitHub</a>') }}
+        </p>
+        <p>
+            {{ _('credit-my-cc-footer-icons',
+                  '<a href="https://en.wikipedia.org/wiki/Tango_Desktop_Project">Tango!</a>') }}
+        </p>
+        <p>
+            {{ _('credit-my-cc-footer-logo',
+                  '<a href="https://creativecommons.org/about/downloads#Icons">BY-ikonen</a>',
+                  '<a href="https://creativecommons.org/licenses/by/4.0/">CC&nbsp;BY&nbsp;4.0</a>',
+                  '<a href="https://commons.wikimedia.org/wiki/File:Speech_bubble.svg">Speech bubble</a>') }}
+        </p>
+    </footer>
+
+    {# ── Translated messages for JS ── #}
+    <script>
+        const MESSAGES = {
+            loading: {{ _('credit-my-cc-loading') | tojson }},
+            missing_file: {{ _('credit-my-cc-missing-file') | tojson }},
+            random_url: {{ _('credit-my-cc-random-url') | tojson }},
+            no_license: {{ _('credit-my-cc-no-license') | tojson }},
+            no_information: {{ _('credit-my-cc-no-information') | tojson }},
+            unsupported_license: {{ _('credit-my-cc-unsupported-license') | tojson }},
+            public_domain: {{ _('credit-my-cc-public-domain') | tojson }},
+            cc0: {{ _('credit-my-cc-cc0') | tojson }},
+            missing_parameter: {{ _('credit-my-cc-missing-parameter') | tojson }},
+            upload_date_note: {{ _('credit-my-cc-upload-date-note') | tojson }},
+            check: {{ _('credit-my-cc-button-check') | tojson }},
+        };
+        const CURRENT_LANG = {{ current_lang | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
