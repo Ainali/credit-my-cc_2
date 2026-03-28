@@ -121,11 +121,11 @@ EXAMPLES = [
         "filename": "Globen.jpg",
     },
     {
-        "label_key": "credit-my-cc-example-cc0",
+        "label": "CC0",
         "filename": "Well-wikipedia2.svg",
     },
     {
-        "label_key": "credit-my-cc-example-gfdl",
+        "label": "GFDL",
         "filename": "0038-fahrradsammlung-RalfR.jpg",
     },
     {

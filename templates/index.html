@@ -30,7 +30,7 @@
         <ul>
             {% for ex in examples %}
             <li>
-                <strong>{{ _( ex.label_key ) }}:</strong>
+                <strong>{{ _(ex.label_key) if ex.label_key else ex.label }}:</strong>
                 <a href="?filename={{ ex.filename | urlencode }}&amp;lang={{ current_lang }}">
                     <code>{{ ex.filename }}</code>
                 </a>
@@ -48,9 +48,7 @@
         <div class="header-text">
             <h1>{{ _('credit-my-cc-title') }}</h1>
             <p>
-                {{ _('credit-my-cc-description') }}<br />
-                {{ _('credit-my-cc-description2') }}<br />
-                {{ _('credit-my-cc-description3') }}
+                {{ _('credit-my-cc-description') }}
             </p>
         </div>
     </header>
@@ -156,8 +154,7 @@
     {# ── Generated letter ── #}
     <section id="letter-section" class="letter-section hidden">
         <div class="copy-hint">
-            {{ _('credit-my-cc-copy-instructions') }}<br />
-            {{ _('credit-my-cc-copy-instructions2') }}
+            {{ _('credit-my-cc-copy-instructions') }}
         </div>
         <div id="letter-content" class="letter-content"></div>
     </section>
