@@ -1,5 +1,7 @@
 """Tests for helper functions: _strip_html and _parse_commons_response."""
 
+import pytest
+
 from app import _parse_commons_response, _strip_html
 
 
@@ -21,6 +23,21 @@ class TestStripHtml:
 
     def test_self_closing_tag(self):
         assert _strip_html("before<br />after") == "beforeafter"
+
+    @pytest.mark.xfail(reason="Markup.striptags() is regex-based; fix when nh3 is added")
+    def test_attribute_containing_gt(self):
+        assert _strip_html('<span title="a > b">text</span>') == "text"
+
+    def test_html_comment(self):
+        assert _strip_html("before<!-- comment -->after") == "beforeafter"
+
+    @pytest.mark.xfail(reason="Markup.striptags() is regex-based; fix when nh3 is added")
+    def test_bare_angle_bracket(self):
+        assert _strip_html("a < b and c > d") == "a < b and c > d"
+
+    @pytest.mark.xfail(reason="Markup.striptags() is regex-based; fix when nh3 is added")
+    def test_script_tag_content_removed(self):
+        assert _strip_html("<script>alert('xss')</script>") == ""
 
 
 class TestParseCommonsResponse:

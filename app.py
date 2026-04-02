@@ -201,7 +201,7 @@ VALID_TONES = {"happy", "neutral", "angry"}
 
 def _strip_html(html_str):
     """Remove all HTML tags from *html_str*."""
-    return re.sub(r"<[^>]+>", "", html_str)
+    return Markup(html_str).striptags()
 
 
 def _query_commons(filename):
