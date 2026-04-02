@@ -30,14 +30,27 @@ This is a modern Python/Flask rewrite of the [original static jQuery tool (v1)](
 
 ### Prerequisites
 
-- Python 3.10+
-- pip
+- Python 3.12+
 
 ### Install & run locally
 
 ```bash
 git clone https://github.com/lokal-profil/credit-my-cc_2.git
 cd credit-my-cc_2
+```
+
+**Using [uv](https://docs.astral.sh/uv/):**
+
+```bash
+uv sync
+uv run flask --app app run --debug
+```
+
+**Using venv + pip:**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 flask --app app run --debug
 ```
@@ -134,7 +147,8 @@ The letter template messages use these placeholders:
 ```
 credit-my-cc-flask/
 ├── app.py                  ← Flask application
-├── requirements.txt        ← Python dependencies
+├── pyproject.toml          ← Project metadata, dev deps, tool config
+├── requirements.txt        ← Python dependencies (production)
 ├── Procfile                ← For Toolforge / gunicorn deployment
 ├── i18n/
 │   ├── en.json             ← English source messages
@@ -151,8 +165,36 @@ credit-my-cc-flask/
 │   ├── favicon.ico
 │   └── images/
 │       └── credit-my-cc.svg
+├── tests/                  ← pytest test suite
+│   ├── conftest.py
+│   ├── test_helpers.py
+│   ├── test_i18n.py
+│   ├── test_routes.py
+│   └── test_letters.py
+├── .github/
+│   └── workflows/
+│       └── ci.yml          ← Lint, typecheck, test on push/PR
 └── README.md
 ```
+
+## Development
+
+### Running tests and linting
+
+Install dev dependencies (`uv sync --extra dev` or `pip install -e ".[dev]"`), then run:
+
+```bash
+pytest                 # tests
+ruff check .           # lint
+ruff format --check .  # formatting
+mypy app.py            # type checking
+```
+
+> If using uv, prefix commands with `uv run` (e.g. `uv run pytest`).
+
+### CI
+
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, type checking, and tests automatically on every push to `main` and on pull requests.
 
 ## Contributing
 

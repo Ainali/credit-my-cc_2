@@ -15,13 +15,13 @@ from pathlib import Path
 from urllib.parse import unquote
 
 import requests
+from banana_i18n import BananaI18n
 from flask import (
     Flask,
     jsonify,
     render_template,
     request,
 )
-from banana_i18n import BananaI18n
 from markupsafe import Markup
 
 # ---------------------------------------------------------------------------
@@ -90,9 +90,9 @@ def _discover_all_other_letters():
             for line in content.splitlines():
                 stripped = line.strip()
                 if stripped.startswith("<!-- title:") and stripped.endswith("-->"):
-                    title = stripped[len("<!-- title:"):][:-len("-->")].strip()
+                    title = stripped[len("<!-- title:") :][: -len("-->")].strip()
                 elif stripped.startswith("<!-- author:") and stripped.endswith("-->"):
-                    author = stripped[len("<!-- author:"):][:-len("-->")].strip()
+                    author = stripped[len("<!-- author:") :][: -len("-->")].strip()
                 elif stripped:
                     break
             # Strip frontmatter comment lines from the letter HTML
@@ -102,12 +102,14 @@ def _discover_all_other_letters():
                 if not html_lines and stripped.startswith("<!--") and stripped.endswith("-->"):
                     continue
                 html_lines.append(line)
-            letters.append({
-                "slug": f.stem,
-                "title": title,
-                "author": author,
-                "html": "\n".join(html_lines),
-            })
+            letters.append(
+                {
+                    "slug": f.stem,
+                    "title": title,
+                    "author": author,
+                    "html": "\n".join(html_lines),
+                }
+            )
         if letters:
             result[lang] = letters
     return result
@@ -123,9 +125,7 @@ def _get_language():
     if lang and lang in _available_languages():
         return lang
     # 2. Accept-Language header
-    best = request.accept_languages.best_match(
-        _available_languages(), default="en"
-    )
+    best = request.accept_languages.best_match(_available_languages(), default="en")
     return best
 
 
@@ -135,9 +135,7 @@ def inject_i18n_helpers():
     lang = _get_language()
 
     available = _available_languages()
-    lang_choices = [
-        (code, LANGUAGE_AUTONYMS.get(code, code)) for code in available
-    ]
+    lang_choices = [(code, LANGUAGE_AUTONYMS.get(code, code)) for code in available]
 
     def msg(key, *args):
         """Translate message *key*, replacing $1, $2, … with *args*."""
@@ -220,7 +218,9 @@ def _query_commons(filename):
         "titles": f"File:{filename}",
     }
     resp = requests.get(
-        COMMONS_API, params=params, timeout=15,
+        COMMONS_API,
+        params=params,
+        timeout=15,
         headers={"User-Agent": USER_AGENT},
     )
     resp.raise_for_status()
@@ -233,7 +233,7 @@ def _parse_commons_response(data):
     Returns a dict with either an ``error`` key or the parsed metadata.
     """
     pages = data.get("query", {}).get("pages", {})
-    for page_id, page in pages.items():
+    for _page_id, page in pages.items():
         if "missing" in page:
             return {"error": "missing_file"}
 
@@ -260,14 +260,10 @@ def _parse_commons_response(data):
 
         # Normalise license name
         render = False
-        if lic_short.startswith("CC-BY-SA-") or lic_short.startswith(
-            "CC BY-SA "
-        ):
+        if lic_short.startswith("CC-BY-SA-") or lic_short.startswith("CC BY-SA "):
             lic_short = "CC BY-SA " + lic_short[9:]
             render = True
-        elif lic_short.startswith("CC-BY-") or lic_short.startswith(
-            "CC BY "
-        ):
+        elif lic_short.startswith("CC-BY-") or lic_short.startswith("CC BY "):
             lic_short = "CC BY " + lic_short[6:]
             render = True
         elif lic_short.startswith("CC0"):
@@ -359,26 +355,26 @@ def api_letter():
     # Build description / date fragments
     descr_fragment = ""
     if data["descr"]:
-        descr_fragment = banana.translate(
-            lang, "credit-my-cc-of-object"
-        ).replace("$1", data["descr"])
+        descr_fragment = banana.translate(lang, "credit-my-cc-of-object").replace(
+            "$1", data["descr"]
+        )
 
     date_fragment = ""
     if data["upload_date"]:
-        date_fragment = banana.translate(
-            lang, "credit-my-cc-since-date"
-        ).replace("$1", data["upload_date"])
+        date_fragment = banana.translate(lang, "credit-my-cc-since-date").replace(
+            "$1", data["upload_date"]
+        )
 
     # Build example attribution lines
     example_online = (
         f'<a href="{data["file_url"]}">{data["file_title"]}</a> / '
-        f'<span>{data["credit"]}</span> / '
+        f"<span>{data['credit']}</span> / "
         f'<a href="{data["license_url"]}">{data["license_title"]}</a>'
     )
     example_offline = (
-        f'{data["file_title"]} @ Wikimedia Commons / '
-        f'{_strip_html(data["credit"])} / '
-        f'{data["license_title"]}'
+        f"{data['file_title']} @ Wikimedia Commons / "
+        f"{_strip_html(data['credit'])} / "
+        f"{data['license_title']}"
     )
 
     # Look up the letter template — either a standard tone or an "other" letter
@@ -389,7 +385,7 @@ def api_letter():
             letter_html = banana.translate("en", msg_key) or ""
     else:
         # Check "other" letters for this language
-        other = {l["slug"]: l for l in OTHER_LETTERS.get(lang, [])}
+        other = {lt["slug"]: lt for lt in OTHER_LETTERS.get(lang, [])}
         if tone not in other:
             return jsonify({"error": "invalid_tone"}), 400
         letter_html = other[tone]["html"]
