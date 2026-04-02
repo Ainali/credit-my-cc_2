@@ -4,25 +4,15 @@
 
 Credit-my-CC is a web tool for producing a complaint letter when your images on Wikimedia Commons are improperly reused without proper Creative Commons attribution.
 
-This is a modern Python/Flask rewrite of the [original static jQuery tool (v1)](https://github.com/Wikimedia-Sverige/credit-my-cc) by André Costa for Wikimedia Sverige.
-
-**Live tool**: https://credit-my-cc.toolforge.org/
-**Repository**: https://github.com/lokal-profil/credit-my-cc_2
-
-## Key improvements over the original
-
-- **Python/Flask backend** — modern framework, easy to deploy on Toolforge or any WSGI host.
-- **Translatewiki.net-compatible i18n** — uses the [Banana message format](https://github.com/wikimedia/banana-i18n) via [`banana-i18n`](https://pypi.org/project/banana-i18n/), the same format used by MediaWiki and other Wikimedia tools. Translation files in `i18n/` are ready to be synced with [translatewiki.net](https://translatewiki.net/wiki/Translating:Intuition).
-- **No jQuery dependency** — vanilla JavaScript.
-- **Responsive design** — works on mobile and desktop.
-- **Server-side letter rendering** — letters are rendered through Jinja2 templates with full i18n support, making it easy to add new letter templates or tones.
+**Live tool**: <https://credit-my-cc.toolforge.org/>
+**Repository**: <https://github.com/lokal-profil/credit-my-cc_2>
 
 ## How to use
 
 1. Enter the filename of the image on Wikimedia Commons and press **Check!**.
 2. Fill in the URL where the image has been improperly used.
 3. Edit the attribution field if needed.
-4. Choose the tone of your complaint letter (happy ☺️ / neutral / angry 😠).
+4. Choose the tone of your complaint letter (happy ☺️ / neutral 😐 / angry 😠).
 5. Press **Write!** to generate the letter.
 6. Copy the text and paste it into your email client.
 
@@ -67,7 +57,7 @@ gunicorn app:app --bind 0.0.0.0:8000
 
 This application is compatible with Toolforge's Python buildpack. Create a `Procfile`:
 
-```
+```text
 web: gunicorn app:app --bind 0.0.0.0:8000
 ```
 
@@ -77,7 +67,7 @@ web: gunicorn app:app --bind 0.0.0.0:8000
 
 Translations use the **Banana message format** — one JSON file per language in the `i18n/` directory:
 
-```
+```text
 i18n/
 ├── en.json      ← English (source messages)
 ├── sv.json      ← Swedish
@@ -97,22 +87,6 @@ Each file looks like:
 }
 ```
 
-### Adding a new language
-
-1. Copy `i18n/en.json` to `i18n/<lang-code>.json`.
-2. Translate all message values (do **not** translate message keys).
-3. Update the `@metadata.authors` array.
-4. Optionally add the language autonym to `LANGUAGE_AUTONYMS` in `app.py`.
-
-### Translatewiki.net integration
-
-The message format is fully compatible with [translatewiki.net](https://translatewiki.net/wiki/Translating:Intuition). To set up integration:
-
-1. File a [Phabricator task](https://phabricator.wikimedia.org/) requesting the project be added to translatewiki.net.
-2. Translatewiki.net's bot will read source messages from `en.json` and `qqq.json`.
-3. Translated messages are pushed back to the repository on a `twn` branch (or via pull requests).
-4. Only `en.json` and `qqq.json` should be edited directly in the source code; all other language files are maintained by translators on translatewiki.net.
-
 ### Parameter syntax
 
 Messages support positional parameters: `$1`, `$2`, etc.
@@ -130,7 +104,7 @@ Each complaint letter tone (happy, neutral, angry) is a **single translatable st
 The letter template messages use these placeholders:
 
 | Placeholder | Content |
-|---|---|
+| --- | --- |
 | `$1` | Description fragment (e.g. " of a sunset"), may be empty |
 | `$2` | URL where the image is improperly used |
 | `$3` | Upload date fragment (e.g. " since 2024-01-15"), may be empty |
@@ -141,41 +115,6 @@ The letter template messages use these placeholders:
 | `$8` | File title on Commons |
 | `$9` | Example online attribution (HTML) |
 | `$10` | Example print/offline attribution (plain text) |
-
-## Project structure
-
-```
-credit-my-cc-flask/
-├── app.py                  ← Flask application
-├── pyproject.toml          ← Project metadata, dev deps, tool config
-├── requirements.txt        ← Python dependencies (production)
-├── Procfile                ← For Toolforge / gunicorn deployment
-├── i18n/
-│   ├── en.json             ← English source messages
-│   ├── sv.json             ← Swedish translations
-│   └── qqq.json            ← Message documentation (for translators)
-├── letters/
-│   └── sv/                 ← Swedish-only "other" letter templates
-│       └── jan.html
-├── templates/
-│   └── index.html          ← Main page template (Jinja2)
-├── static/
-│   ├── style.css           ← Stylesheet
-│   ├── app.js              ← Client-side JavaScript
-│   ├── favicon.ico
-│   └── images/
-│       └── credit-my-cc.svg
-├── tests/                  ← pytest test suite
-│   ├── conftest.py
-│   ├── test_helpers.py
-│   ├── test_i18n.py
-│   ├── test_routes.py
-│   └── test_letters.py
-├── .github/
-│   └── workflows/
-│       └── ci.yml          ← Lint, typecheck, test on push/PR
-└── README.md
-```
 
 ## Development
 
@@ -195,6 +134,18 @@ mypy app.py            # type checking
 ### CI
 
 A GitHub Actions workflow (`.github/workflows/ci.yml`) runs lint, type checking, and tests automatically on every push to `main` and on pull requests.
+
+## Background
+
+This is a modern Python/Flask rewrite of the [original static jQuery tool (v1)](https://github.com/Wikimedia-Sverige/credit-my-cc) by André Costa for Wikimedia Sverige.
+
+### Key improvements over the original
+
+- **Python/Flask backend** — modern framework, easy to deploy on Toolforge or any WSGI host.
+- **Translatewiki.net-compatible i18n** — uses the [Banana message format](https://github.com/wikimedia/banana-i18n) via [`banana-i18n`](https://pypi.org/project/banana-i18n/), the same format used by MediaWiki and other Wikimedia tools. Translation files in `i18n/` are ready to be synced with [translatewiki.net](https://translatewiki.net/wiki/Translating:Intuition).
+- **No jQuery dependency** — vanilla JavaScript.
+- **Responsive design** — works on mobile and desktop.
+- **Server-side letter rendering** — letters are rendered through Jinja2 templates with full i18n support, making it easy to add new letter templates or tones.
 
 ## Contributing
 
