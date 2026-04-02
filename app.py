@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+import nh3
 import requests
 from banana_i18n import BananaI18n
 from flask import (
@@ -196,7 +197,7 @@ VALID_TONES = {"happy", "neutral", "angry"}
 
 def _strip_html(html_str):
     """Remove all HTML tags from *html_str*."""
-    return Markup(html_str).striptags()
+    return nh3.clean(html_str, tags=set())
 
 
 def _query_commons(filename):
@@ -337,11 +338,15 @@ def api_letter():
     lang = _get_language()
 
     # Gather raw data from query parameters.
-    # NOTE: "credit" may contain legitimate HTML (links from the Commons
-    # API Artist field) and needs HTML-aware sanitization via nh3 once
-    # that dependency is added.  Left unescaped for now.
+    # "credit" may contain legitimate HTML (links from the Commons API
+    # Artist field) — sanitize with nh3, allowing only safe inline tags.
     data = {
-        "credit": request.args.get("credit", ""),
+        "credit": nh3.clean(
+            request.args.get("credit", ""),
+            tags={"a", "span", "bdi"},
+            attributes={"a": {"href"}},
+            link_rel=None,
+        ),
         "descr": request.args.get("descr", ""),
         "file_url": request.args.get("file_url", ""),
         "file_title": request.args.get("file_title", ""),
@@ -365,7 +370,8 @@ def api_letter():
         )
 
     # Build example attribution lines — Markup.format() auto-escapes
-    # arguments unless they are already Markup objects.
+    # arguments unless they are already Markup objects.  credit is
+    # wrapped in Markup() because it was already sanitized by nh3 above.
     example_online = Markup('<a href="{}">{}</a> / <span>{}</span> / <a href="{}">{}</a>').format(
         data["file_url"],
         data["file_title"],
@@ -393,8 +399,7 @@ def api_letter():
         letter_html = other[tone]["html"]
 
     # Replace all $N placeholders with the actual values.
-    # Escape plain-text values to prevent XSS; credit is left as-is
-    # (needs nh3 sanitization — see TODO).
+    # Plain-text values are escaped; credit is already sanitized by nh3.
     #
     # $1  = description fragment      $6  = license title
     # $2  = usage URL                 $7  = license URL

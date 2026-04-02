@@ -131,3 +131,22 @@ class TestApiLetter:
         params = self.LETTER_PARAMS.replace("tone=happy", "tone=jan")
         resp = client.get(f"/api/letter?lang=en&{params}")
         assert resp.status_code == 400
+
+    def test_credit_disallowed_html_is_stripped(self, client):
+        params = self.LETTER_PARAMS.replace(
+            "credit=TestUser", "credit=%3Cscript%3Ealert(1)%3C/script%3EName"
+        )
+        resp = client.get(f"/api/letter?lang=en&{params}")
+        body = resp.data.decode()
+        assert "<script>" not in body
+        assert "alert(1)" not in body
+        assert "Name" in body
+
+    def test_credit_allowed_html_is_preserved(self, client):
+        params = self.LETTER_PARAMS.replace(
+            "credit=TestUser",
+            "credit=%3Ca+href%3D%22http%3A%2F%2Fexample.com%22%3EAlice%3C/a%3E",
+        )
+        resp = client.get(f"/api/letter?lang=en&{params}")
+        body = resp.data.decode()
+        assert '<a href="http://example.com">Alice</a>' in body
