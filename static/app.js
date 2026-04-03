@@ -50,7 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
     $$("#credit, #descr").forEach((input) => {
         input.addEventListener("input", () => {
             const previewEl = $(`#${input.id}-preview`);
-            if (previewEl) previewEl.textContent = input.value;
+            if (!previewEl) return;
+            if (input.id === "credit") {
+                previewEl.innerHTML = DOMPurify.sanitize(input.value);
+            } else {
+                previewEl.textContent = input.value;
+            }
         });
     });
 
