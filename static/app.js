@@ -97,19 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ── Ctrl+C / ⌘+C auto-select letter ──────────────────────────────
-    document.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === "c") {
-            if (!letterContent.textContent) return;
-            if (window.getSelection().toString()) return;
-            const range = document.createRange();
-            range.selectNodeContents(letterContent);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
-    });
-
     // ── Copy logic ─────────────────────────────────────────────────
     function doCopy() {
         if (!letterContent.textContent) return;
